@@ -248,7 +248,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   }
 });
 
-const updateProfileImages = asyncHandler(async (req, res) => {
+const updateProfileImage = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
   if (!avatarLocalPath) {
@@ -302,6 +302,36 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, user, "Cover image updated successfully"));
 });
 
+const deleteProfileImage = asyncHandler(async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        avatar: "",
+      },
+    },
+    { new: true }
+  ).select("-password");
+  return res
+    .status(200)
+    .json(new apiResponse(200, user, "Avatar deleted successfully"));
+});
+
+const deleteCoverImage = asyncHandler(async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        coverImage: "",
+      },
+    },
+    { new: true }
+  ).select("-password");
+  return res
+    .status(200)
+    .json(new apiResponse(200, user, "Cover image deleted successfully"));
+});
+
 export {
   registerUser,
   loginUser,
@@ -310,6 +340,8 @@ export {
   changeCurrentPassword,
   getCurrentUser,
   updateAccountDetails,
-  updateProfileImages,
+  updateProfileImage,
   updateUserCoverImage,
+  deleteProfileImage,
+  deleteCoverImage,
 };
