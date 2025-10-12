@@ -341,9 +341,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
   }
 
   const channel = await User.aggregate([
-    {
-      $match: { username: username?.toLowerCase() },
-    },
+    { $match: { username: username.toLowerCase() } },
     {
       $lookup: {
         from: "subscriptions",
@@ -362,19 +360,13 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     },
     {
       $addFields: {
-        subscriberCount: {
-          $size: "$subscribers",
-        },
-        channelSubscribedCount: {
-          $size: "$subscribedTo",
-        },
+        subscriberCount: { $size: "$subscribers" },
+        channelSubscribedCount: { $size: "$subscribedTo" },
         isSubscribed: {
           $cond: {
-            if: {
-              $in: [req.user?._id, "$subscribers.subscriber"],
-              then: true,
-              else: false,
-            },
+            if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+            then: true,
+            else: false,
           },
         },
       },
@@ -392,6 +384,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       },
     },
   ]);
+
   if (!channel?.length) {
     throw new apiError(404, "Channel not found");
   }
