@@ -41,9 +41,23 @@ const videoSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+
+    tags: [String],
   },
 
-  { timestamps: true }
+  { collection: "videos" }
 );
+
+videoSchema.plugin(mongooseAggregatePaginate);
+videoSchema.set({
+  toJSON: {
+    virtuals: true,
+    transform: (doc, ret) => {
+      delete ret.__v;
+      return ret;
+    },
+  },
+  timestamps: true,
+});
 
 export const Video = mongoose.model("Video", videoSchema);
