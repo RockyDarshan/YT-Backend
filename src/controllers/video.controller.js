@@ -7,24 +7,45 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import apiError from "../utils/apiError.js";
 
 export const uploadVideo = asyncHandler(async (req, res, next) => {
-  if (!req.file) {
-    return next(new apiError("No video file provided", 400));
+  try {
+    if (!req.file) {
+      return next(new apiError("No video file provided", 400));
+    }
+
+    if (!req.file.path) {
+      return next(new apiError("File upload failed - no file path", 400));
+    }
+
+    const { title, description, isPublished } = req.body;
+
+    if (!title?.trim()) {
+      return next(new apiError("Title is required", 400));
+    }
+
+    const videoUploadResult = await uploadOnCloudinary(req.file.path);
+
+    if (!videoUploadResult?.secure_url) {
+      return next(new apiError("Failed to upload video to cloud storage", 500));
+    }
+
+    const newVideo = new Video({
+      videoFile: videoUploadResult.secure_url,
+      thumbnail: videoUploadResult.secure_url, // Placeholder for thumbnail
+      title: title.trim(),
+      description: description?.trim() || "",
+      isPublished: isPublished !== undefined ? isPublished : true,
+      owner: req.user._id,
+    });
+
+    await newVideo.save();
+
+    return res
+      .status(201)
+      .json(new apiResponse(201, newVideo, "Video uploaded successfully"));
+  } catch (error) {
+    console.error("Video upload error:", error);
+    return next(new apiError("Failed to process video upload", 500));
   }
-
-  const { title, description, isPublished } = req.body;
-  const videoUploadResult = await uploadOnCloudinary(req.file.path, "videos");
-
-  const newVideo = new Video({
-    videoFile: videoUploadResult.secure_url,
-    thumbnail: videoUploadResult.secure_url, // Placeholder for thumbnail
-    title,
-    description,
-    isPublished: isPublished !== undefined ? isPublished : true,
-    owner: req.user._id,
-  });
-  await newVideo.save();
-
-  apiResponse(res, 201, true, "Video uploaded successfully", newVideo);
 });
 
 export const getVideoById = asyncHandler(async (req, res, next) => {
@@ -39,7 +60,9 @@ export const getVideoById = asyncHandler(async (req, res, next) => {
   if (!video) {
     return next(new apiError("Video not found", 404));
   }
-  apiResponse(res, 200, true, "Video retrieved successfully", video);
+  return res
+    .status(200)
+    .json(new apiResponse(200, video, "Video retrieved successfully"));
 });
 
 export const incrementVideoViews = asyncHandler(async (req, res, next) => {
@@ -55,7 +78,9 @@ export const incrementVideoViews = asyncHandler(async (req, res, next) => {
   if (!video) {
     return next(new apiError("Video not found", 404));
   }
-  apiResponse(res, 200, true, "Video views incremented successfully", video);
+  return res
+    .status(200)
+    .json(new apiResponse(200, video, "Video views incremented successfully"));
 });
 
 export const deleteVideo = asyncHandler(async (req, res, next) => {
@@ -68,14 +93,18 @@ export const deleteVideo = asyncHandler(async (req, res, next) => {
     return next(new apiError("Video not found", 404));
   }
   await video.remove();
-  apiResponse(res, 200, true, "Video deleted successfully");
+  return res
+    .status(200)
+    .json(new apiResponse(200, {}, "Video deleted successfully"));
 });
 
 export const getAllVideos = asyncHandler(async (req, res, next) => {
-  const videos = await Video.find()
+  const videos = await Video.find({ isPublished: true })
     .populate("owner", "username email")
     .sort({ createdAt: -1 });
-  apiResponse(res, 200, true, "Videos retrieved successfully", videos);
+  return res
+    .status(200)
+    .json(new apiResponse(200, videos, "Videos retrieved successfully"));
 });
 
 export const getUserVideos = asyncHandler(async (req, res, next) => {
@@ -83,7 +112,9 @@ export const getUserVideos = asyncHandler(async (req, res, next) => {
   const videos = await Video.find({ owner: userId })
     .populate("owner", "username email")
     .sort({ createdAt: -1 });
-  apiResponse(res, 200, true, "User's videos retrieved successfully", videos);
+  return res
+    .status(200)
+    .json(new apiResponse(200, videos, "User's videos retrieved successfully"));
 });
 
 export const updateVideoDetails = asyncHandler(async (req, res, next) => {
@@ -100,7 +131,9 @@ export const updateVideoDetails = asyncHandler(async (req, res, next) => {
   if (description !== undefined) video.description = description;
   if (isPublished !== undefined) video.isPublished = isPublished;
   await video.save();
-  apiResponse(res, 200, true, "Video details updated successfully", video);
+  return res
+    .status(200)
+    .json(new apiResponse(200, video, "Video details updated successfully"));
 });
 
 export const searchVideos = asyncHandler(async (req, res, next) => {
@@ -109,19 +142,28 @@ export const searchVideos = asyncHandler(async (req, res, next) => {
     return next(new apiError("Search query is required", 400));
   }
   const videos = await Video.find({
+    isPublished: true,
     $or: [
       { title: { $regex: query, $options: "i" } },
       { description: { $regex: query, $options: "i" } },
     ],
   }).populate("owner", "username email");
-  apiResponse(res, 200, true, "Search results retrieved successfully", videos);
+  return res
+    .status(200)
+    .json(
+      new apiResponse(200, videos, "Search results retrieved successfully")
+    );
 });
 export const getTrendingVideos = asyncHandler(async (req, res, next) => {
-  const videos = await Video.find()
+  const videos = await Video.find({ isPublished: true })
     .sort({ views: -1 })
     .limit(10)
     .populate("owner", "username email");
-  apiResponse(res, 200, true, "Trending videos retrieved successfully", videos);
+  return res
+    .status(200)
+    .json(
+      new apiResponse(200, videos, "Trending videos retrieved successfully")
+    );
 });
 export const getRecentVideos = asyncHandler(async (req, res, next) => {
   const videos = await Video.find()

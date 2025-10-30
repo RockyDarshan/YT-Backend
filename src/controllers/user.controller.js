@@ -6,6 +6,10 @@ import { apiResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
+export const healthCheck = asyncHandler(async (req, res) => {
+  return res.status(200).json(new apiResponse(200, {}, "Backend is healthy"));
+});
+
 const generateAccessAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
