@@ -8,7 +8,10 @@ export default function VideoPlayer({ video }) {
         <video
           controls
           src={video.videoFile || video.videoUrl}
-          poster={video.thumbnail}
+          poster={
+            video.thumbnail ||
+            "https://via.placeholder.com/1280x720?text=No+preview"
+          }
           className="player rounded-md shadow-md max-w-full"
         />
       </div>

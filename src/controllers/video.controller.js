@@ -30,7 +30,8 @@ export const uploadVideo = asyncHandler(async (req, res, next) => {
 
     const newVideo = new Video({
       videoFile: videoUploadResult.secure_url,
-      thumbnail: videoUploadResult.secure_url, // Placeholder for thumbnail
+      // use eager-generated thumbnail if available, otherwise fall back to video url
+      thumbnail: videoUploadResult.thumbnail || videoUploadResult.secure_url,
       title: title.trim(),
       description: description?.trim() || "",
       isPublished: isPublished !== undefined ? isPublished : true,
@@ -166,9 +167,11 @@ export const getTrendingVideos = asyncHandler(async (req, res, next) => {
     );
 });
 export const getRecentVideos = asyncHandler(async (req, res, next) => {
-  const videos = await Video.find()
+  const videos = await Video.find({ isPublished: true })
     .sort({ createdAt: -1 })
     .limit(10)
     .populate("owner", "username email");
-  apiResponse(res, 200, true, "Recent videos retrieved successfully", videos);
+  return res
+    .status(200)
+    .json(new apiResponse(200, videos, "Recent videos retrieved successfully"));
 });

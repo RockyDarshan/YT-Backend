@@ -9,9 +9,19 @@ body { @apply bg-gray-50 text-gray-900; }
 .navbar { @apply bg-gray-900 text-white }
 .nav-inner { @apply flex items-center justify-between px-4 py-3 }
 .brand { @apply text-xl font-semibold }
+.nav-search { @apply ml-4 }
+.search-input { @apply placeholder-gray-400 text-black }
+
+/* navbar auth buttons */
+.nav-auth .nav-auth-link { @apply text-sm text-white px-3 py-1 rounded hover:bg-gray-800 transition }
+.nav-auth .nav-auth-register { @apply text-sm text-white px-3 py-1 rounded border border-white/20 hover:bg-white/10 transition }
 .video-list { @apply grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 }
 .video-card { @apply bg-white rounded-md overflow-hidden shadow-sm }
 .thumb img { @apply w-full h-44 object-cover }
+.video-card { @apply relative }
+.video-card:hover { @apply shadow-md }
+.thumb-overlay { @apply opacity-100 }
+.title { @apply overflow-hidden text-ellipsis }
 .meta { @apply p-3 }
 .title { @apply text-sm font-medium mb-1 }
 .channel { @apply text-xs text-gray-500 }
@@ -19,4 +29,9 @@ body { @apply bg-gray-50 text-gray-900; }
 .upload-form { @apply max-w-xl space-y-3 }
 .upload-form input, .upload-form textarea { @apply w-full px-3 py-2 border border-gray-200 rounded-md bg-white }
 button { @apply px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 }
+
+/* small responsive tweak for navbar on mobile */
+@media (max-width: 640px) {
+	.nav-inner { @apply flex-col items-start space-y-2 }
+}
 
