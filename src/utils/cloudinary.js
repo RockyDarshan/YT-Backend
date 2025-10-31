@@ -11,14 +11,27 @@ const uploadOnCloudinary = async (filePath) => {
   try {
     if (!filePath) return null;
 
-    // For video files, request an eager-generated thumbnail (jpg) so we can
-    // display a preview on the frontend. Use resource_type 'video' to ensure
-    // Cloudinary generates video-derived transformations.
-    const result = await cloudinary.uploader.upload(filePath, {
-      resource_type: "video",
-      eager: [{ width: 480, height: 270, crop: "fill", format: "jpg" }],
-      eager_async: false,
-    });
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      console.error("File not found:", filePath);
+      return null;
+    }
+
+    // Determine resource type based on file extension
+    const fileExt = filePath.split(".").pop().toLowerCase();
+    const isVideo = ["mp4", "mov", "avi", "webm"].includes(fileExt);
+
+    const uploadOptions = {
+      resource_type: isVideo ? "video" : "auto",
+      ...(isVideo
+        ? {
+            eager: [{ width: 480, height: 270, crop: "fill", format: "jpg" }],
+            eager_async: false,
+          }
+        : {}),
+    };
+
+    const result = await cloudinary.uploader.upload(filePath, uploadOptions);
 
     // delete local temp file if it exists (guarded)
     try {
@@ -33,6 +46,7 @@ const uploadOnCloudinary = async (filePath) => {
     const thumbnail = result?.eager?.[0]?.secure_url || null;
     return { ...result, thumbnail };
   } catch (error) {
+    console.error("Error uploading to Cloudinary:", error);
     // try to remove local file if present, but DO NOT re-throw fs errors
     try {
       if (filePath && fs.existsSync(filePath)) {

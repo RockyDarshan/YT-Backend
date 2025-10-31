@@ -1,4 +1,4 @@
-# YT Clone - Frontend
+# YT Clone
 
 This is a minimal React + Vite frontend scaffold for your YT-Clone backend.
 

@@ -113,7 +113,7 @@ export default function Navbar() {
               >
                 Logout
               </button>
-              <Link to={`/c/${user.username}`} className="flex items-center">
+              <Link to={`/profile`} className="flex items-center">
                 <img
                   src={user.avatar || "https://via.placeholder.com/28"}
                   alt="avatar"

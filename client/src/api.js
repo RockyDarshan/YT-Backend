@@ -138,4 +138,15 @@ export async function uploadVideo(formData) {
   return res.data.data;
 }
 
+// Channel / user endpoints
+export async function getChannel(username) {
+  const res = await api.get(`/api/v1/users/c/${encodeURIComponent(username)}`);
+  return res.data.data;
+}
+
+export async function getUserVideos() {
+  const res = await api.get(`/api/v1/videos/user`);
+  return res.data.data;
+}
+
 export default api;

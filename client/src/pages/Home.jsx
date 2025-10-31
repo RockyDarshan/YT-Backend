@@ -10,7 +10,6 @@ export default function Home() {
     let mounted = true;
     getVideos()
       .then((data) => {
-        console.log("Fetched videos:", data); // Debug log
         if (mounted) setVideos(data || []);
       })
       .catch((err) => {
