@@ -29,7 +29,7 @@ export default function Home() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Trending</h1>
       </div>
-      <VideoList videos={videos} />
+      <VideoList videos={videos} showAvatar={true} />
     </section>
   );
 }

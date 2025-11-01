@@ -59,7 +59,7 @@ export const getVideoById = asyncHandler(async (req, res, next) => {
   }
   const video = await Video.findById(videoId).populate(
     "owner",
-    "username email"
+    "username fullname avatar"
   );
   if (!video) {
     return next(new apiError("Video not found", 404));
@@ -126,7 +126,7 @@ export const deleteVideo = asyncHandler(async (req, res, next) => {
 
 export const getAllVideos = asyncHandler(async (req, res, next) => {
   const videos = await Video.find({ isPublished: true })
-    .populate("owner", "username email")
+    .populate("owner", "username email avatar")
     .sort({ createdAt: -1 });
   return res
     .status(200)
@@ -136,7 +136,7 @@ export const getAllVideos = asyncHandler(async (req, res, next) => {
 export const getUserVideos = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
   const videos = await Video.find({ owner: userId })
-    .populate("owner", "username email")
+    .populate("owner", "username email avatar")
     .sort({ createdAt: -1 });
   return res
     .status(200)
@@ -232,7 +232,7 @@ export const getTrendingVideos = asyncHandler(async (req, res, next) => {
   const videos = await Video.find({ isPublished: true })
     .sort({ views: -1 })
     .limit(10)
-    .populate("owner", "username email");
+    .populate("owner", "username email avatar");
   return res
     .status(200)
     .json(
@@ -243,7 +243,7 @@ export const getRecentVideos = asyncHandler(async (req, res, next) => {
   const videos = await Video.find({ isPublished: true })
     .sort({ createdAt: -1 })
     .limit(10)
-    .populate("owner", "username email");
+    .populate("owner", "username email avatar");
   return res
     .status(200)
     .json(new apiResponse(200, videos, "Recent videos retrieved successfully"));

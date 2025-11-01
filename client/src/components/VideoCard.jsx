@@ -6,7 +6,12 @@ import { AuthContext } from "../context/AuthContext";
 
 const PLACEHOLDER = "https://via.placeholder.com/480x270?text=No+thumbnail";
 
-export default function VideoCard({ video, onDelete, showDelete = false }) {
+export default function VideoCard({
+  video,
+  onDelete,
+  showDelete = false,
+  showAvatar = false,
+}) {
   const { user } = useContext(AuthContext);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -96,9 +101,22 @@ export default function VideoCard({ video, onDelete, showDelete = false }) {
                 {video?.title}
               </Link>
             </h4>
-            <p className="channel text-xs text-gray-500">
-              {video?.owner?.username || video?.ownerName || "Unknown channel"}
-            </p>
+            <div className="flex items-center gap-2">
+              {showAvatar &&
+              (video?.owner?.avatar || video?.owner?.avatarUrl) ? (
+                <img
+                  src={video.owner.avatar || video.owner.avatarUrl}
+                  alt={video?.owner?.username || "avatar"}
+                  className="w-6 h-6 rounded-full object-cover"
+                />
+              ) : null}
+
+              <p className="channel text-xs text-gray-500">
+                {video?.owner?.username ||
+                  video?.ownerName ||
+                  "Unknown channel"}
+              </p>
+            </div>
           </div>
 
           {/* Show delete button only if showDelete is true and user owns the video */}

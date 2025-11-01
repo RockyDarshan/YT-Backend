@@ -5,6 +5,7 @@ export default function VideoList({
   videos: initialVideos,
   onVideoDeleted,
   showDelete = false,
+  showAvatar = false,
 }) {
   const [videos, setVideos] = React.useState(initialVideos);
 
@@ -27,6 +28,7 @@ export default function VideoList({
           video={v}
           onDelete={handleDelete}
           showDelete={showDelete}
+          showAvatar={showAvatar}
         />
       ))}
     </div>

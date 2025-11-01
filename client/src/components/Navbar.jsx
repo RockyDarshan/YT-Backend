@@ -122,11 +122,11 @@ export default function Navbar() {
               </Link>
             </div>
           ) : (
-            <div className="flex items-center space-x-2">
-              <Link to="/login" className="nav-auth-link">
+            <div className="mr-4 flex items-center space-x-2">
+              <Link to="/login" className="mr-2 nav-auth-link">
                 Login
               </Link>
-              <Link to="/register" className="nav-auth-register">
+              <Link to="/register" className="mr-2 nav-auth-register">
                 Register
               </Link>
             </div>
