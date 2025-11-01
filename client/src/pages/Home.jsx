@@ -25,8 +25,8 @@ export default function Home() {
   if (loading) return <p>Loading videos...</p>;
 
   return (
-    <section className="home">
-      <div className="flex items-center justify-between mb-6">
+    <section className=" home">
+      <div className=" flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Trending</h1>
       </div>
       <VideoList videos={videos} showAvatar={true} />
