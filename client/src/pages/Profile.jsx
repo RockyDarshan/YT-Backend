@@ -62,7 +62,7 @@ export default function Profile() {
 
       <div>
         <h3 className="text-lg font-medium mb-4">My videos</h3>
-        <VideoList videos={videos} />
+        <VideoList videos={videos} showDelete={true} />
       </div>
     </section>
   );

@@ -149,4 +149,9 @@ export async function getUserVideos() {
   return res.data.data;
 }
 
+export async function deleteVideo(videoId) {
+  const res = await api.delete(`/api/v1/videos/${videoId}`);
+  return res.data;
+}
+
 export default api;

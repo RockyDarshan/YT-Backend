@@ -1,7 +1,10 @@
 import { Video } from "../models/video.model.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  uploadOnCloudinary,
+  deleteFromCloudinary,
+} from "../utils/cloudinary.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import apiError from "../utils/apiError.js";
@@ -89,11 +92,33 @@ export const deleteVideo = asyncHandler(async (req, res, next) => {
   if (!mongoose.Types.ObjectId.isValid(videoId)) {
     return next(new apiError("Invalid video ID", 400));
   }
+
+  // Find the video and check ownership
   const video = await Video.findById(videoId);
   if (!video) {
     return next(new apiError("Video not found", 404));
   }
-  await video.remove();
+
+  // Check if the user owns the video
+  if (video.owner.toString() !== req.user._id.toString()) {
+    return next(
+      new apiError("Unauthorized: You can only delete your own videos", 403)
+    );
+  }
+
+  // Extract public ID from video URL (everything after the last / and before the file extension)
+  const videoPublicId = video.videoFile.split("/").slice(-1)[0].split(".")[0];
+
+  // Delete from Cloudinary first
+  const cloudinaryResult = await deleteFromCloudinary(videoPublicId, "video");
+  if (!cloudinaryResult || cloudinaryResult.result !== "ok") {
+    console.error("Failed to delete video from Cloudinary:", cloudinaryResult);
+    return next(new apiError("Failed to delete video from cloud storage", 500));
+  }
+
+  // If Cloudinary delete successful, remove from database
+  await Video.findByIdAndDelete(videoId);
+
   return res
     .status(200)
     .json(new apiResponse(200, {}, "Video deleted successfully"));
