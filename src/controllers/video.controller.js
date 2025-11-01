@@ -167,17 +167,65 @@ export const searchVideos = asyncHandler(async (req, res, next) => {
   if (!query) {
     return next(new apiError("Search query is required", 400));
   }
-  const videos = await Video.find({
-    isPublished: true,
-    $or: [
-      { title: { $regex: query, $options: "i" } },
-      { description: { $regex: query, $options: "i" } },
-    ],
-  }).populate("owner", "username email");
+
+  // Use aggregation to also search by owner's username
+  const regex = new RegExp(query, "i");
+  const page = Math.max(parseInt(req.query.page || "1", 10), 1);
+  const limit = Math.max(parseInt(req.query.limit || "20", 10), 1);
+  const skip = (page - 1) * limit;
+
+  // Use aggregation to also search by owner's username and paginate
+  const agg = [
+    { $match: { isPublished: true } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+      },
+    },
+    { $unwind: { path: "$owner", preserveNullAndEmptyArrays: true } },
+    {
+      $match: {
+        $or: [
+          { title: { $regex: regex } },
+          { description: { $regex: regex } },
+          { "owner.username": { $regex: regex } },
+        ],
+      },
+    },
+    { $sort: { createdAt: -1 } },
+    {
+      $facet: {
+        results: [{ $skip: skip }, { $limit: limit }],
+        totalCount: [{ $count: "count" }],
+      },
+    },
+  ];
+
+  const aggResult = await Video.aggregate(agg).exec();
+  const results = (aggResult[0] && aggResult[0].results) || [];
+  const totalCount =
+    (aggResult[0] &&
+      aggResult[0].totalCount[0] &&
+      aggResult[0].totalCount[0].count) ||
+    0;
+  const totalPages = Math.ceil(totalCount / limit);
+
+  const payload = {
+    videos: results,
+    meta: {
+      total: totalCount,
+      page,
+      limit,
+      totalPages,
+    },
+  };
   return res
     .status(200)
     .json(
-      new apiResponse(200, videos, "Search results retrieved successfully")
+      new apiResponse(200, payload, "Search results retrieved successfully")
     );
 });
 export const getTrendingVideos = asyncHandler(async (req, res, next) => {

@@ -154,4 +154,13 @@ export async function deleteVideo(videoId) {
   return res.data;
 }
 
+export async function searchVideos(query, page = 1, limit = 20) {
+  const params = new URLSearchParams();
+  params.set("query", query);
+  params.set("page", String(page));
+  params.set("limit", String(limit));
+  const res = await api.get(`/api/v1/videos/search?${params.toString()}`);
+  return res.data.data; // { videos: [...], meta: { total, page, limit, totalPages } }
+}
+
 export default api;

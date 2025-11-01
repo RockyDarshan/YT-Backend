@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Channel from "./pages/Channel";
 import Profile from "./pages/Profile";
+import Search from "./pages/Search";
 import { AuthProvider } from "./context/AuthContext";
 import ConnectionStatus from "./components/ConnectionStatus";
 
@@ -44,6 +45,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/watch/:id" element={<Watch />} />
             <Route path="/c/:username" element={<Channel />} />
+            <Route path="/search" element={<Search />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/upload" element={<Upload />} />
             <Route path="/login" element={<Login />} />
